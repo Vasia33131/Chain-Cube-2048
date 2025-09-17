@@ -7,11 +7,17 @@ namespace ChainCube.Scripts.Handlers
     public class ForceYMovementSwipeHandler : MonoBehaviour, IMovableObjectHandler
     {
         [SerializeField]
-        private float _force = 1.0f;
-        
+        private float _forwardForce = 15.0f;
+
+        [SerializeField]
+        private float _upwardForce = 5.0f;
+
+        [SerializeField]
+        private XMovementSwipeHandler _xMovementHandler;
+
         private Rigidbody _movableRigidBody;
         private ISwipeDetector _swipeDetector;
-        
+
         public void Inject(GameObject dependency)
         {
             _movableRigidBody = dependency.GetComponent<Rigidbody>();
@@ -19,14 +25,20 @@ namespace ChainCube.Scripts.Handlers
 
         private void Start()
         {
-            _swipeDetector = GetComponent<MouseSwipeDetector>();
+            _swipeDetector = GetComponent<ISwipeDetector>();
+
+            if (_xMovementHandler == null)
+            {
+                _xMovementHandler = FindObjectOfType<XMovementSwipeHandler>();
+            }
+
             Subscribe();
         }
 
         private void Subscribe()
         {
             if (_swipeDetector == null)
-                throw new NullReferenceException("Вы забыли прикрепить SwipeDetector!");
+                return;
 
             _swipeDetector.onSwipeEnd += OnSwipeEnd;
         }
@@ -35,9 +47,26 @@ namespace ChainCube.Scripts.Handlers
         {
             if (_movableRigidBody == null)
                 return;
-            
-            _movableRigidBody.AddForce(_movableRigidBody.transform.forward * _force, ForceMode.Impulse);
+
+            // Простой бросок вперед
+            ThrowCubeForward();
+
+            // Блокируем управление
+            if (_xMovementHandler != null)
+            {
+                _xMovementHandler.LockControl();
+            }
+
             _movableRigidBody = null;
+        }
+
+        private void ThrowCubeForward()
+        {
+            // Убедимся, что rigidbody не кинематический
+            _movableRigidBody.isKinematic = false;
+
+            Vector3 force = (Vector3.forward * _forwardForce) + (Vector3.up * _upwardForce);
+            _movableRigidBody.AddForce(force, ForceMode.Impulse);
         }
 
         private void OnDestroy()
@@ -54,4 +83,3 @@ namespace ChainCube.Scripts.Handlers
         }
     }
 }
-

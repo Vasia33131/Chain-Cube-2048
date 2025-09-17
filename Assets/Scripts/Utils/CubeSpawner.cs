@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using ChainCube.Scripts.Handlers;
+using System.Collections;
 using UnityEngine;
 
 namespace ChainCube.Scripts.Utils
@@ -12,7 +13,9 @@ namespace ChainCube.Scripts.Utils
 
         private CubeDependencyInjector[] _cubeDependencies;
         private ISwipeDetector _swipeDetector;
+        private XMovementSwipeHandler _xMovementHandler;
         private Coroutine _spawnRoutine;
+        private bool _canSpawn = true;
 
         private void Start()
         {
@@ -26,6 +29,10 @@ namespace ChainCube.Scripts.Utils
             }
 
             _cubeDependencies = FindObjectsOfType<CubeDependencyInjector>();
+            _xMovementHandler = FindObjectOfType<XMovementSwipeHandler>();
+
+            // Спавним первый куб сразу
+            SpawnCube();
         }
 
         private void Subscribe()
@@ -36,17 +43,9 @@ namespace ChainCube.Scripts.Utils
             }
         }
 
-        private void Unsubscribe()
-        {
-            if (_swipeDetector != null)
-            {
-                _swipeDetector.onSwipeEnd -= OnSwipeEnd;
-            }
-        }
-
         private void OnSwipeEnd(Vector2 delta)
         {
-            if (_spawnRoutine == null && _cubePrefab != null)
+            if (_canSpawn && _spawnRoutine == null)
             {
                 _spawnRoutine = StartCoroutine(SpawnWithDelay());
             }
@@ -54,23 +53,33 @@ namespace ChainCube.Scripts.Utils
 
         private IEnumerator SpawnWithDelay()
         {
-            yield return null;
+            _canSpawn = false;
             yield return new WaitForSeconds(_spawnDelay);
 
-            if (_cubePrefab == null)
-            {
-                _spawnRoutine = null;
-                yield break;
-            }
-
-            var instance = Instantiate(_cubePrefab, transform.position, Quaternion.identity);
-
-            if (instance != null)
-            {
-                InjectCube(instance.gameObject);
-            }
+            SpawnCube();
 
             _spawnRoutine = null;
+            _canSpawn = true;
+        }
+
+        private void SpawnCube()
+        {
+            if (_cubePrefab == null)
+                return;
+
+            // Разблокируем управление для нового куба
+            if (_xMovementHandler != null)
+            {
+                _xMovementHandler.UnlockControl();
+            }
+
+            InstantiateAndInject();
+        }
+
+        private void InstantiateAndInject()
+        {
+            var instance = Instantiate(_cubePrefab, transform.position, Quaternion.identity);
+            InjectCube(instance.gameObject);
         }
 
         private void InjectCube(GameObject cube)
@@ -90,12 +99,17 @@ namespace ChainCube.Scripts.Utils
         private void OnDestroy()
         {
             Unsubscribe();
-
-            // Stop any running coroutines when the object is destroyed
             if (_spawnRoutine != null)
             {
                 StopCoroutine(_spawnRoutine);
-                _spawnRoutine = null;
+            }
+        }
+
+        private void Unsubscribe()
+        {
+            if (_swipeDetector != null)
+            {
+                _swipeDetector.onSwipeEnd -= OnSwipeEnd;
             }
         }
     }

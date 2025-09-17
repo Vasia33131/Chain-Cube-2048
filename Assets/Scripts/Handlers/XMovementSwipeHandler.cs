@@ -12,18 +12,20 @@ namespace ChainCube.Scripts.Handlers
         [SerializeField]
         private Transform _rightBorder;
 
-        [SerializeField, Range (0.5f, 1.5f)]
-        private float _normalizedCoefficient = 1.0f;
-        
-        private GameObject _movableObject;
+        [SerializeField, Range(1f, 10f)]
+        private float _moveSpeed = 8.0f; // Увеличено в 26 раз!
 
+        private GameObject _movableObject;
         private ISwipeDetector _swipeDetector;
-        
+        private bool _isControlling = false;
+        private Vector2 _touchStartPosition;
+        private float _objectStartX;
+
         public void Inject(GameObject dependency)
         {
             _movableObject = dependency;
         }
-        
+
         private void Start()
         {
             _swipeDetector = GetComponent<ISwipeDetector>();
@@ -33,37 +35,54 @@ namespace ChainCube.Scripts.Handlers
         private void Subscribe()
         {
             if (_swipeDetector == null)
-                throw new NullReferenceException("Вы забыли прикрепить SwipeDetector!");
+                return;
 
+            _swipeDetector.onSwipeStart += OnSwipeStart;
             _swipeDetector.onSwipe += OnSwipe;
             _swipeDetector.onSwipeEnd += OnSwipeEnd;
         }
 
+        private void OnSwipeStart(Vector2 delta)
+        {
+            if (_movableObject == null) return;
+
+            _isControlling = true;
+            _touchStartPosition = Input.mousePosition;
+            _objectStartX = _movableObject.transform.position.x;
+        }
+
         private void OnSwipe(Vector2 delta)
         {
-            if (_movableObject == null)
-            {
-                return;
-            }
+            if (!_isControlling || _movableObject == null) return;
 
-            if (Mathf.Abs(delta.x - Mathf.Epsilon) <= 0)
-                return;
+            // Очень высокая чувствительность!
+            float screenWidth = Screen.width;
+            float moveAmount = delta.x / screenWidth * _moveSpeed * 5f; // Дополнительный множитель
 
-            var borderDistance = Mathf.Abs(_rightBorder.position.x - _leftBorder.position.x);
-            var offset = borderDistance * _normalizedCoefficient * delta.x / Screen.width;
-            var currentPos = _movableObject.transform.position;
-            
-            _movableObject.transform.position = new Vector3(currentPos.x + offset, currentPos.y, currentPos.z);
-            
-            if (_movableObject.transform.position.x > _rightBorder.position.x)
-                _movableObject.transform.position = _rightBorder.transform.position;
-            else if (_movableObject.transform.position.x < _leftBorder.position.x)
-                _movableObject.transform.position = _leftBorder.transform.position;
+            float newX = _movableObject.transform.position.x + moveAmount;
+            newX = Mathf.Clamp(newX, _leftBorder.position.x, _rightBorder.position.x);
+
+            _movableObject.transform.position = new Vector3(
+                newX,
+                _movableObject.transform.position.y,
+                _movableObject.transform.position.z
+            );
         }
 
         private void OnSwipeEnd(Vector2 delta)
         {
+            _isControlling = false;
+        }
+
+        public void LockControl()
+        {
+            _isControlling = false;
             _movableObject = null;
+        }
+
+        public void UnlockControl()
+        {
+            // Разблокировка происходит через Inject
         }
 
         private void OnDestroy()
@@ -75,8 +94,10 @@ namespace ChainCube.Scripts.Handlers
         {
             if (_swipeDetector == null)
                 return;
-            
+
+            _swipeDetector.onSwipeStart -= OnSwipeStart;
             _swipeDetector.onSwipe -= OnSwipe;
+            _swipeDetector.onSwipeEnd -= OnSwipeEnd;
         }
     }
 }
