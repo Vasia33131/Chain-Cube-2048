@@ -891,7 +891,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 4, y: 0.501, z: -11}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1.8, y: 1.8, z: 1.8}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 8272518985429133562}
@@ -1044,6 +1044,18 @@ MonoBehaviour:
     material: {fileID: 2100000, guid: 21b6a9b77e3b5e849804e992902ad691, type: 2}
   - points: 32
     material: {fileID: 2100000, guid: efcc6debc9599d44c9b1bfdcb5062421, type: 2}
+  - points: 64
+    material: {fileID: 2100000, guid: 618ef409ad57a4340ae904c4ad522ede, type: 2}
+  - points: 128
+    material: {fileID: 2100000, guid: c83afd87ded20dc4ab089f8452f60e1f, type: 2}
+  - points: 256
+    material: {fileID: 2100000, guid: 3bf20cb68ba62b44f9b088aca3ef1af0, type: 2}
+  - points: 512
+    material: {fileID: 2100000, guid: 490d52344aaec1d42a5dddc54fa1d78d, type: 2}
+  - points: 1024
+    material: {fileID: 2100000, guid: 862f118cd714915418362f7c59efd4e9, type: 2}
+  - points: 2048
+    material: {fileID: 2100000, guid: fbe378b00690636489642400572d4465, type: 2}
 --- !u!114 &3419071290836115251
 MonoBehaviour:
   m_ObjectHideFlags: 0
