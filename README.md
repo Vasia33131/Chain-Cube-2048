@@ -5,7 +5,11 @@ Chain Cube 2048 на Unity — соединяй одинаковые кубы, �
 <img width="274" height="477" alt="Снимок экрана 2026-05-14 193607" src="https://github.com/user-attachments/assets/9a7685d8-f621-4260-bbe2-5bb0b93744a5" width="30%"/>
 <img width="268" height="480" alt="Снимок экрана 2026-05-14 193555" src="https://github.com/user-attachments/assets/e2e049b2-1fb2-4890-a6bf-ec53296c7bd4" width="30%"/>
 <img width="270" height="480" alt="Снимок экрана 2026-05-14 193534" src="https://github.com/user-attachments/assets/20b96dd0-c520-4504-a245-de960f0de46e" width="30%" />
-[<video src="Эпизод 01_4.mp4"  width="30%"></video>] (https://github.com/user-attachments/assets/9b348cbd-43fd-4dbd-9911-692ce7324e84)
+
+
+https://github.com/user-attachments/assets/9b348cbd-43fd-4dbd-9911-692ce7324e84
+
+
 
 
 О проекте
